@@ -1,5 +1,7 @@
 import type { PaymentProtocol, SpendingPolicy } from "../core/types";
 import { detectPaymentChallenge } from "./challenge";
+import { selectPayment } from "./selector";
+import { parseX402Required } from "./x402";
 
 export interface PaymentAdapter {
   protocol: PaymentProtocol;
@@ -9,6 +11,7 @@ export interface PaymentAdapter {
 export interface PaymeshFetchOptions {
   policy: SpendingPolicy;
   adapters: PaymentAdapter[];
+  spent?: string;
 }
 
 export async function paymeshFetch(
@@ -26,6 +29,14 @@ export async function paymeshFetch(
     throw new Error("Payment required, but Paymesh could not identify the protocol");
   }
 
+  let selectedRaw: unknown = challenge.request.raw;
+
+  if (challenge.protocol === "x402") {
+    const offers = parseX402Required(String(challenge.request.raw));
+    const selected = selectPayment(offers, options.policy, options.spent ?? "0");
+    selectedRaw = selected.raw;
+  }
+
   const adapter = options.adapters.find(
     (candidate) => candidate.protocol === challenge.protocol,
   );
@@ -34,8 +45,5 @@ export async function paymeshFetch(
     throw new Error(`No ${challenge.protocol} payment adapter configured`);
   }
 
-  // The protocol adapter is responsible for parsing the authoritative amount
-  // and currency before signing. Budget enforcement will occur immediately
-  // before adapter execution once normalized protocol parsers are connected.
-  return adapter.pay(challenge.request.raw, firstRequest.clone());
+  return adapter.pay(selectedRaw, firstRequest.clone());
 }
