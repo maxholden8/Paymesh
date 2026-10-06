@@ -15,8 +15,8 @@ export interface ServiceOffer {
 }
 
 export interface SpendingPolicy {
-  maxPerTransaction: number;
-  maxTotal: number;
+  maxPerTransaction: string;
+  maxTotal: string;
   currency: string;
 }
 
