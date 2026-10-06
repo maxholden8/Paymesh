@@ -26,6 +26,10 @@ export interface PaymentRequest {
   currency: string;
   resource: string;
   raw: unknown;
+  atomicAmount?: string;
+  decimals?: number;
+  network?: string;
+  asset?: string;
 }
 
 export interface Receipt {
