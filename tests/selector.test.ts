@@ -3,8 +3,8 @@ import { selectPayment } from "../src/payments/selector";
 
 describe("selectPayment", () => {
   const policy = {
-    maxPerTransaction: 1,
-    maxTotal: 5,
+    maxPerTransaction: "1",
+    maxTotal: "5",
     currency: "USDC",
   };
 
